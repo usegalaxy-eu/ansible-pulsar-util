@@ -1,0 +1,3 @@
+---
+# defaults file for pulsar-metric-collection
+pulsar_consumer_dir: "/opt/"
