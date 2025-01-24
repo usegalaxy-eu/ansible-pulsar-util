@@ -1,3 +1,13 @@
 ---
-# defaults file for pulsar-metric-collection
+# defaults file for pulsar-metrics
+
+# path for producer scripts
+# pulsar_data_path should be set as part of the pulsar deployment playbook
+pulsar_data_path: /data/share
+pulsar_metrics_scripts_path: "{{ pulsar_data_path }}/scripts"
+
+# role has to be one of consumer or producer
+pulsar_metric_role: consumer
+
+# consumer role variables
 pulsar_consumer_dir: "/opt/"

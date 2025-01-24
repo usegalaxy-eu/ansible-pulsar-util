@@ -1,6 +1,8 @@
 # Ansible role: pulsar-metric-collection
 
-A role that installs a collector script that collects the pulsar consumption metrics from the respective amqp queue
+A role that either installs a: 
+- producer script that sends htcondor stats to an amqp queue on the Pulsar side
+- consumer script that collects the metrics from the amqp queue on the Galaxy side, aggregates them and sends them to an InfluxDB
 
 ## Requirements
 
@@ -18,9 +20,10 @@ None.
 
 ```yaml
 ---
-- name: Install and configure a pulsar metric collector script
+- name: Install and configure a pulsar metric consumer script
   hosts: all
   vars:
+    pulsar_metric_role: consumer
     telegraf_plugins_extra:
       # telegraf plugin for sending pulsar metrics to influx
       condor_monitor:
@@ -34,8 +37,18 @@ None.
           - interval = "1m"
 
   roles:
-      # Fastapi that collects stats about Pulsar nodes
-      - role: pdg.pulsar-metric-collection
+      - role: pdg.pulsar-metrics
+```
+
+```yaml
+---
+- name: Install and configure a pulsar metric producer script
+  hosts: all
+  vars:
+    pulsar_metric_role: producer
+
+  roles:
+      - role: pdg.pulsar-metrics
 ```
 
 ## License

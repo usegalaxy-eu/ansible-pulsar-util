@@ -1,0 +1,16 @@
+---
+- name: "Send machine group monitor"
+  copy:
+    src: "consumer.py"
+    dest: "{{ pulsar_consumer_dir }}/pulsar_metric_consumer.py"
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Allow telegraf to run pulsar_metric_consumer.py
+  lineinfile:
+    path: /etc/sudoers
+    state: present
+    insertafter: EOF
+    line: 'telegraf ALL=(ALL) NOPASSWD: {{ pulsar_consumer_dir }}/pulsar_metric_consumer.py'
+    validate: 'visudo -cf %s'
