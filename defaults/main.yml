@@ -10,4 +10,6 @@ pulsar_metrics_scripts_path: "{{ pulsar_data_path }}/scripts"
 pulsar_metric_role: consumer
 
 # consumer role variables
-pulsar_consumer_dir: "/opt/"
+pulsar_consumer_dir: "/opt/pulsar_metrics"
+consumer_venv_dir: "{{ pulsar_consumer_dir }}/venv"
+consumer_galaxy_job_conf: "{{ galaxy_config_dir }}/galaxy.yml"
