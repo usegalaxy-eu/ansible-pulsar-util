@@ -89,6 +89,21 @@ def consume_target(amqp_url: str, stats_queue) -> None:
         print(f"Failed to connect to the AMQP queue of {vhost}.")
 
 
+def set_influxdb_conf() -> tuple:
+    """
+    Retrieve the InfluxDB configuration from the environment variables.
+    """
+    
+    host = {{ consumer_influx_address }}
+    port = {{ consumer_influx_port }}
+    username = {{ consumer_influx_username }}
+    password = {{ consumer_influx_password }}
+    database = {{ consumer_influx_db }}
+    measurement = {{ consumer_influx_measurement }}
+
+    return host, port, username, password, database, measurement
+
+
 def get_influxdb_conf_from_env() -> tuple:
     """
     Retrieve the InfluxDB configuration from the environment variables.
@@ -256,7 +271,7 @@ def main(job_conf_file: str, threshold: int) -> None:
         proc.join()
 
     # Get the InfluxDB configuration from the environment variables
-    influxdb_host, influxdb_port, influxdb_username, influxdb_password, influxdb_database, influxdb_measurement = get_influxdb_conf_from_env()
+    influxdb_host, influxdb_port, influxdb_username, influxdb_password, influxdb_database, influxdb_measurement = set_influxdb_conf()
 
     # Connect to the InfluxDB database
     client = influxdb_connect(influxdb_host, influxdb_port, influxdb_username, influxdb_password, influxdb_database)
