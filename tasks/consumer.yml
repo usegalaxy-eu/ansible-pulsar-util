@@ -1,7 +1,15 @@
 ---
+- name: Create directory
+  ansible.builtin.file:
+    path: "{{ pulsar_consumer_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
 - name: Send machine group monitor
-  ansible.builtin.copy:
-    src: "consumer.py"
+  ansible.builtin.template:
+    src: "consumer.py.j2"
     dest: "{{ pulsar_consumer_dir }}/pulsar_metric_consumer.py"
     owner: root
     group: root
@@ -32,4 +40,4 @@
   cron:
     name: "condor stats"
     minute: "*"
-    job: "{{ consumer_venv_dir }}/bin/python {{ pulsar_consumer_dir }}/pulsar_metric_consumer.py {{ consumer_galaxy_job_conf }}
+    job: "{{ consumer_venv_dir }}/bin/python {{ pulsar_consumer_dir }}/pulsar_metric_consumer.py {{ consumer_galaxy_job_conf }}"
