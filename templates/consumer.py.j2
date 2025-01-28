@@ -284,7 +284,7 @@ def main(job_conf_file: str, threshold: int) -> None:
         body = stats_queue.get()
         for vhost, data in body.items():
             if data:
-                data['condor_metrics'] = f"{data['condor_metrics']},destination_status=online"
+                data['condor_metrics'] = f"{data['condor_metrics']},destination_status=\"online\""
                 results.append(data['condor_metrics'])
             else:
                 new_entry = influxdb_create_newentry(client, influxdb_measurement, vhost, threshold)

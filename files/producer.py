@@ -85,7 +85,7 @@ def produce_message(amqp_url: str, condor_metrics: str) -> None:
         queue.declare()
 
         # Add destination to metrics
-        condor_metrics = f"{condor_metrics},destinationd_id={vhost}"
+        condor_metrics = f"{condor_metrics},destination_id=\"{vhost}\""
 
         producer.publish(
             {"condor_metrics": condor_metrics},
