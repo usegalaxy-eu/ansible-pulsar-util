@@ -30,7 +30,7 @@ None.
         plugin: exec
         config:
           - commands = [
-            "{{ custom_telegraf_env }} python {{ pulsar_consumer_dir }}/pulsar_metric_consumer.py {{ galaxy_config_dir }}/job_conf.yml",
+            "{{ consumer_venv_dir }}/bin/python {{ pulsar_consumer_dir }}/pulsar_metric_consumer.py {{ consumer_galaxy_job_conf }}",
             ]
           - timeout = "10s"
           - data_format = "influx"
@@ -38,6 +38,7 @@ None.
 
   roles:
       - role: pdg.pulsar-metrics
+      - role: dj-wasabi.telegraf
 ```
 
 ```yaml

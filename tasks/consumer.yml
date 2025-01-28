@@ -37,8 +37,8 @@
   environment:
     VIRTUAL_ENV: "{{ consumer_venv_dir }}"
 
-- name: Add cron to collect stats
-  cron:
-    name: "condor stats"
-    minute: "*"
-    job: "{{ consumer_venv_dir }}/bin/python {{ pulsar_consumer_dir }}/pulsar_metric_consumer.py {{ consumer_galaxy_job_conf }}"
+# - name: Add cron to collect stats
+#   cron:
+#     name: "condor stats"
+#     minute: "*"
+#     job: "{{ consumer_venv_dir }}/bin/python {{ pulsar_consumer_dir }}/pulsar_metric_consumer.py {{ consumer_galaxy_job_conf }}"

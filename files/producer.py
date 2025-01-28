@@ -80,7 +80,7 @@ def produce_message(amqp_url: str, condor_metrics: str) -> None:
         channel = connection.channel()
         exchange = Exchange(f"{vhost}-condor-exchange", type="direct")
         producer = Producer(exchange=exchange, channel=channel, routing_key=routing_key)
-        queue = Queue(name=f"{vhost}-condor-stats", exchange=exchange, routing_key=routing_key)
+        queue = Queue(name=f"{vhost}-condor-stats0", exchange=exchange, routing_key=routing_key)
         queue.maybe_bind(connection)
         queue.declare()
 
