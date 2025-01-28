@@ -4,6 +4,8 @@ A role that either installs a:
 - producer script that sends htcondor stats to an amqp queue on the Pulsar side
 - consumer script that collects the metrics from the amqp queue on the Galaxy side, aggregates them and sends them to an InfluxDB
 
+Note: the consumer script needs read access to the galaxy job_conf
+
 ## Requirements
 
 No specific requirements, the role is self-contained.
