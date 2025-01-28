@@ -26,7 +26,8 @@
 - name: Create a virtualenv and install dependencies
   ansible.builtin.pip:
     name: 
-      - pip 
+      - pip
+      - pyyaml
       - influxdb
       - kombu
     virtualenv: "{{ consumer_venv_dir }}"
