@@ -24,7 +24,10 @@ def get_pulsar_runners(job_conf_file: str) -> dict:
         job_conf = yaml.safe_load(file)
 
     pulsar_runners = {}
-    for runner, values in job_conf["runners"].items():
+
+    runners = job_conf.get("runners") or job_conf.get("galaxy", {}).get("job_config", {}).get("runners", {})
+
+    for runner, values in runners.items():
         if runner.startswith("pulsar"):
             if "amqp_url" in values:
                 pulsar_runners[runner] = values["amqp_url"]
@@ -94,12 +97,12 @@ def set_influxdb_conf() -> tuple:
     Retrieve the InfluxDB configuration from the environment variables.
     """
     
-    host = {{ consumer_influx_address }}
-    port = {{ consumer_influx_port }}
-    username = {{ consumer_influx_username }}
-    password = {{ consumer_influx_password }}
-    database = {{ consumer_influx_db }}
-    measurement = {{ consumer_influx_measurement }}
+    host = "{{ consumer_influx_address }}"
+    port = "{{ consumer_influx_port }}"
+    username = "{{ consumer_influx_username }}"
+    password = "{{ consumer_influx_password }}"
+    database = "{{ consumer_influx_db }}"
+    measurement = "{{ consumer_influx_measurement }}"
 
     return host, port, username, password, database, measurement
 
