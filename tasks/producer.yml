@@ -22,5 +22,5 @@
     cron:
       name: "condor stats"
       minute: "*"
-      job: "/opt/pulsar/venv3/bin/python {{ pulsar_metrics_scripts_path }}/producer.py {{ pulsar_root }}/config/app.yml {{ pulsar_metrics_scripts_path }}/cluster_util.sh"
+      job: "/opt/pulsar/venv3/bin/python {{ pulsar_metrics_scripts_path }}/producer.py {{ pulsar_app_dir }}/app.yml {{ pulsar_metrics_scripts_path }}/cluster_util.sh"
   
