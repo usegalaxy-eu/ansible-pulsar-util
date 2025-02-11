@@ -11,7 +11,7 @@ from influxdb import InfluxDBClient
 from kombu import Connection, Consumer, Exchange, Queue
 
 
-def get_pulsar_runners(job_conf_file: str) -> dict:
+def get_pulsar_runners(job_conf_file: str, destinations: list) -> dict:
     """
     Parse the job_conf.yml file and extract the Pulsar runners and their AMQP URLs.
     """
@@ -30,7 +30,8 @@ def get_pulsar_runners(job_conf_file: str) -> dict:
     for runner, values in runners.items():
         if runner.startswith("pulsar"):
             if "amqp_url" in values:
-                pulsar_runners[runner] = values["amqp_url"]
+                if get_vhost_name(values["amqp_url"]) in destinations:
+                    pulsar_runners[runner] = values["amqp_url"]
 
     return pulsar_runners
 
@@ -208,7 +209,7 @@ def build_influxline_protocol_entry(measurement: str, tags: dict, fields: dict, 
     Format the data as an InfluxDB line protocol string.
     """
     tag_str = ",".join([f"{key}={value}" for key, value in tags.items()])
-    field_str = ",".join([f"{key}={value}" if value is not None else f"{key}=" for key, value in fields.items()])
+    field_str = ",".join([f"{key}={value}" for key, value in fields.items() if value not in (None, "")])
 
     return f"{measurement},{tag_str} {field_str} {timestamp}"
 
@@ -240,14 +241,16 @@ def influxdb_create_newentry(client: InfluxDBClient, measurement: str, destinati
                 for key, value in last_entry.items():
                     if key in tag_keys:
                         if value is not None:
-                            tags[key] = value
+                            # TODO: the host tag should be removed from the table
+                            if key != "host":
+                                tags[key] = value
                     elif key in field_keys:
                         if key == 'querytime':
                             fields[key] = current_epoch
                         elif key == 'destination_id':
-                            fields[key] = destination_id
+                            fields[key] = f"\"{destination_id}\""
                         elif key == 'destination_status':
-                            fields[key] = "offline"
+                            fields[key] = "\"offline\""
                         else:
                             fields[key] = None
 
@@ -258,11 +261,11 @@ def influxdb_create_newentry(client: InfluxDBClient, measurement: str, destinati
         return None
 
 
-def main(job_conf_file: str, threshold: int) -> None:
+def main(job_conf_file: str, threshold: int, destinations: list) -> None:
     """
     Consume messages from multiple AMQP queues in parallel and aggregate the results.
     """
-    amqp_urls = get_pulsar_runners(job_conf_file)
+    amqp_urls = get_pulsar_runners(job_conf_file, destinations)
 
     if not amqp_urls:
         print("No Pulsar runners found in the job configuration file.")
@@ -306,7 +309,8 @@ def main(job_conf_file: str, threshold: int) -> None:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Consume messages from AMQP queues and aggregate them.")
     parser.add_argument("job_conf_file", type=str, help="Path to the job configuration file (YAML).")
+    parser.add_argument("destinations", type=str, help="comma-separated list of destinations.")
     parser.add_argument("--threshold", type=int, default=600, help="Time threshold in seconds for setting destination_status=offline.")
     args = parser.parse_args()
 
-    main(args.job_conf_file, args.threshold)
+    main(args.job_conf_file, args.threshold, args.destinations.split(","))
