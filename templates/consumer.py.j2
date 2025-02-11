@@ -85,7 +85,7 @@ def consume_target(amqp_url: str, stats_queue) -> None:
             try:
                 connection.drain_events(timeout=2)
             except Exception as e:
-                print(f"Error consuming messages: {e}")
+                #print(f"Error consuming messages: {e}")
                 stats_queue.put({vhost: None})
     else:
         print(f"Failed to connect to the AMQP queue of {vhost}.")
@@ -231,27 +231,29 @@ def influxdb_create_newentry(client: InfluxDBClient, measurement: str, destinati
     if len(entries):
         last_entry = entries[0]
 
-        # Check if last entry is older than the threshold
-        if current_epoch - last_entry['querytime'] > threshold:
-            tags, fields = {}, {}
+        if last_entry['destination_status'] != "offline":
 
-            for key, value in last_entry.items():
-                if key in tag_keys:
-                    if value is not None:
-                        tags[key] = value
-                elif key in field_keys:
-                    if key == 'querytime':
-                        fields[key] = current_epoch
-                    elif key == 'destination_id':
-                        fields[key] = destination_id
-                    elif key == 'destination_status':
-                        fields[key] = "offline"
-                    else:
-                        fields[key] = None
+            # Check if last entry is older than the threshold
+            if current_epoch - last_entry['querytime'] > threshold:
+                tags, fields = {}, {}
 
-            # Build and return influx line protocol entry
-            line_protocol_entry = build_influxline_protocol_entry(measurement, tags, fields, time.time_ns())
-            return line_protocol_entry
+                for key, value in last_entry.items():
+                    if key in tag_keys:
+                        if value is not None:
+                            tags[key] = value
+                    elif key in field_keys:
+                        if key == 'querytime':
+                            fields[key] = current_epoch
+                        elif key == 'destination_id':
+                            fields[key] = destination_id
+                        elif key == 'destination_status':
+                            fields[key] = "offline"
+                        else:
+                            fields[key] = None
+
+                # Build and return influx line protocol entry
+                line_protocol_entry = build_influxline_protocol_entry(measurement, tags, fields, time.time_ns())
+                return line_protocol_entry
     else:
         return None
 
