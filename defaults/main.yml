@@ -7,7 +7,9 @@ pulsar_data_path: /data/share
 pulsar_metrics_scripts_path: "{{ pulsar_data_path }}/scripts"
 # pulsar_root should be set as part of the pulsar deployment playbook
 pulsar_root: /opt/pulsar
-pulsar_app_dir: "{{ pulsar_root }}/config"
+# multi pulsar setup
+pulsar_app_dir_list: 
+  - "{{ pulsar_root }}/config"
 
 # role has to be one of consumer or producer
 pulsar_metric_role: consumer
