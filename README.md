@@ -1,10 +1,10 @@
 # Ansible role: pulsar-metric-collection
 
-A role that either installs a: 
+A role that either installs a:
 - producer script that sends htcondor stats to an amqp queue on the Pulsar side
 - consumer script that collects the metrics from the amqp queue on the Galaxy side, aggregates them and sends them to an InfluxDB
 
-Note: the consumer script needs read access to the galaxy job_conf
+Note: the consumer script needs read access to the galaxy `job_conf`
 
 ## Requirements
 
@@ -57,9 +57,12 @@ None.
           - destination = "esg"
 
   roles:
-      - role: pdg.pulsar-metrics
+      - role: ansible-pulsar-util
       - role: dj-wasabi.telegraf
 ```
+
+- For deploying producer script and set up cron job to run it.
+_Note: Make sure to update the `pulsar_app_dir` variable's value._
 
 ```yaml
 ---
@@ -67,9 +70,10 @@ None.
   hosts: all
   vars:
     pulsar_metric_role: producer
+    pulsar_app_dir: "/opt/pulsar/config"
 
   roles:
-      - role: pdg.pulsar-metrics
+      - role: ansible-pulsar-util
 ```
 
 ## License
