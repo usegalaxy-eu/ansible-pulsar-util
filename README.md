@@ -18,7 +18,9 @@ Role variables are documented in the forms of comments on [defaults/main.yml](de
 
 None.
 
-## Example Playbook
+## Example Playbooks
+
+### Deployment of the consumer
 
 ```yaml
 ---
@@ -61,8 +63,17 @@ None.
       - role: dj-wasabi.telegraf
 ```
 
-- For deploying producer script and set up cron job to run it.
-_Note: Make sure to update the `pulsar_app_dir` variable's value._
+### Deployment of the producer
+
+Please pay special attention to the value of these two variables
+in the [defaults/main.yml](defaults/main.yml) file
+* `pulsar_app_dir`
+* `pulsar_root`
+
+Their value should be consistent with the ones configured as part
+of the deployment of pulsar via the
+[https://github.com/usegalaxy-eu/pulsar-deployment](https://github.com/usegalaxy-eu/pulsar-deployment)
+repository.
 
 ```yaml
 ---
@@ -71,6 +82,7 @@ _Note: Make sure to update the `pulsar_app_dir` variable's value._
   vars:
     pulsar_metric_role: producer
     pulsar_app_dir: "/opt/pulsar/config"
+    pulsar_data_path: "/data/share"
 
   roles:
       - role: ansible-pulsar-util
