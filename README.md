@@ -44,7 +44,7 @@ None.
           - destination = ["esg"]
     telegraf_plugins_extra:
       # telegraf plugin for sending pulsar metrics to influx
-      condor_monitor:
+      pular_monitor:
         plugin: exec
         config:
           - commands = [
