@@ -7,6 +7,20 @@
   become_user: pulsar
   become: yes
   block:
+  - name: Check existence of folder to store producer scripts
+    ansible.builtin.stat:
+      path: "{{ pulsar_metrics_scripts_path }}"
+    register: st
+
+  - name: Create folder to store producer scripts
+    ansible.builtin.file:
+      path: "{{ pulsar_metrics_scripts_path }}"
+      state: directory
+      owner: pulsar
+      group: pulsar
+      mode: '0755'
+    when: not st.stat.exists
+
   - name: Copy producer files
     ansible.builtin.copy:
       src: "{{ item }}"
