@@ -57,12 +57,12 @@ def process_condor_status_output(condor_status_output: str) -> str:
     return processed_output
 
 
-def get_condor_status() -> list:
+def get_condor_cluster_utilisation() -> list:
     """
     Get condor metrics from scheduler python bindings
     """
 
-    from htcondor import collect_metrics
+    from htcondor_cluster_util import collect_metrics
 
     condor_metrics = collect_metrics()
 
@@ -111,7 +111,7 @@ def main(pulsar_app_file: str, cluster_type: str) -> None:
     metrics = []
     if cluster_type == "htcondor":
         # Get the condor status
-        metrics = get_condor_status()
+        metrics = get_condor_cluster_utilisation()
     else:
         raise RuntimeError(f"Unsupported cluster type {cluster_type}")
 
