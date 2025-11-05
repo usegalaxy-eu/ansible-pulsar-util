@@ -1,6 +1,9 @@
 import json
 
-import htcondor2 as htcondor
+try:
+    import htcondor
+except ImportError:
+    import htcondor2 as htcondor
 
 
 def collect_metrics():
