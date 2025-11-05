@@ -261,6 +261,18 @@ def influxdb_create_newentry(client: InfluxDBClient, measurement: str, destinati
         return None
 
 
+def get_carbon_intensity(auth_token, lat, lon) -> float:
+    request = f"""
+        https://api.electricitymaps.com/v3/carbon-intensity/
+        latest?lat={lat}&lon={lon}&temporalGranularity=hourly
+    """
+    response = requests.get(
+        request,
+        headers={ "auth-token": auth_token }
+    )
+    return response.json()["carbonIntensity"]
+
+
 def main(job_conf_file: str, threshold: int, destinations: list) -> None:
     """
     Consume messages from multiple AMQP queues in parallel and aggregate the results.
