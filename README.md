@@ -34,6 +34,18 @@ None.
     consumer_influx_username: "influx_user"
     consumer_influx_password: "influx_pass"
     consumer_influx_measurement: "htcondor_cluster_usage"
+    pulsar_consumer_dir: "/opt/pulsar_metrics"
+    consumer_venv_dir: "{{ pulsar_consumer_dir }}/venv"
+    consumer_galaxy_job_conf: "{{ galaxy_config_dir }}/galaxy.yml"
+    tpv_destinations_conf: "{{ tpv_mutable_dir }}/destinations.yml"
+
+    consumer_energy_measurement: "pulsar_carbon_intensity"
+    energy_auth_token: "secret_token"
+
+    consumer_destinations:
+      - pulsar_de02
+      - pulsar_cz01 
+      - pulsar_it01
     telegraf_agent_output:
       - type: influxdb
         config:
