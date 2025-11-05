@@ -88,7 +88,7 @@ def produce_message(amqp_url: str, metrics: list) -> None:
         # Add destination to metrics
         fixed_metrics = []
         for metr in metrics:
-            fixed_metrics.append(f"{metr[0]},destination_id=\"{vhost}\",{metr[1]} {metr[2]}")
+            fixed_metrics.append(f"{metr[0]},destination_id=\"{vhost}\",{metr[1]} {metr[2]} {metr[3]}")
 
         producer.publish(
             {"metrics": fixed_metrics},
@@ -117,10 +117,12 @@ def main(pulsar_app_file: str, cluster_type: str) -> None:
 
     # Add timestamp
     now = time.time()
-    metrics = [f"{metr} {now}" for metr in metrics]
+    timed_metrics = []
+    for metr in metrics:
+        timed_metrics.append(metr + (now,))
 
     # Create and publish message
-    produce_message(amqp_url, metrics)
+    produce_message(amqp_url, timed_metrics)
 
 
 if __name__ == "__main__":

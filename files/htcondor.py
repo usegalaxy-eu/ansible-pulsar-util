@@ -25,12 +25,11 @@ def collect_metrics():
     for unclaimed_slot_type in unclaimed_slots_summary:
         classad = json.loads(unclaimed_slot_type)
 
-
         uniq_tag = f"{slot['Cpus']}c_{slot['Memory']}m"
 
         influx_tagset = f"unclaimed_tag={uniq_tag}"
         influx_fieldset = f"count={unclaimed_slots_summary[unclaimed_slot_type]},unclaimed_cpus={classad['Cpus']},unclaimed_memory={classad['Memory']}"
 
-        metrics.append(influx_msmt, influx_tagset, influx_fieldset)
+        metrics.append((influx_msmt, influx_tagset, influx_fieldset))
 
     return metrics
