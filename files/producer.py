@@ -49,14 +49,6 @@ def connect_to_queue(amqp_url: str) -> Connection:
         return None
 
 
-def process_condor_status_output(condor_status_output: str) -> str:
-    """
-    Replace empty/None values  with 0 in the condor status output
-    """
-    processed_output = re.sub(r'(\w+)=,', r'\1=0,', condor_status_output)
-    return processed_output
-
-
 def get_condor_cluster_utilisation() -> list:
     """
     Get condor metrics from scheduler python bindings
@@ -86,12 +78,12 @@ def produce_message(amqp_url: str, metrics: list) -> None:
         queue.declare()
 
         # Add destination to metrics
-        fixed_metrics = []
+        processed_metrics = []
         for metr in metrics:
-            fixed_metrics.append(f"{metr[0]},destination_id=\"{vhost}\",{metr[1]} {metr[2]} {metr[3]}")
+            processed_metrics.append(f"{metr[0]},destination_id=\"{vhost}\",{metr[1]} {metr[2]}")
 
         producer.publish(
-            {"metrics": fixed_metrics},
+            {"metrics": processed_metrics},
             exchange=exchange,
             routing_key=routing_key,
             declare=[queue],
@@ -115,14 +107,8 @@ def main(pulsar_app_file: str, cluster_type: str) -> None:
     else:
         raise RuntimeError(f"Unsupported cluster type {cluster_type}")
 
-    # Add timestamp
-    now = time.time()
-    timed_metrics = []
-    for metr in metrics:
-        timed_metrics.append(metr + (now,))
-
     # Create and publish message
-    produce_message(amqp_url, timed_metrics)
+    produce_message(amqp_url, metrics)
 
 
 if __name__ == "__main__":
