@@ -3,11 +3,12 @@
 import argparse
 import os
 import re
-import subprocess
 import sys
 import time
-import yaml
+
 from kombu import Connection, Exchange, Producer, Queue
+
+import yaml
 
 
 def get_amqp_url(pulsar_app_file: str) -> None:
@@ -48,27 +49,19 @@ def connect_to_queue(amqp_url: str) -> Connection:
         return None
 
 
-def process_condor_status_output(condor_status_output: str) -> str:
+def get_condor_cluster_utilisation() -> list:
     """
-    Replace empty/None values  with 0 in the condor status output
+    Get condor metrics from scheduler python bindings
     """
-    processed_output = re.sub(r'(\w+)=,', r'\1=0,', condor_status_output)
-    return processed_output
 
+    from htcondor_cluster_util import collect_metrics
 
-def get_condor_status(cluster_status_script_file: str) -> str:
-    """
-    Get condor status from shell script output
-    """
-    condor_metrics = process_condor_status_output(subprocess.check_output(["sh", cluster_status_script_file]).decode("utf-8").strip())
+    condor_metrics = collect_metrics()
 
-    # Add timestamp
-    now = time.time()
-    condor_metrics = f"{condor_metrics},querytime={now}"
     return condor_metrics
 
 
-def produce_message(amqp_url: str, condor_metrics: str) -> None:
+def produce_message(amqp_url: str, metrics: list) -> None:
     """
     Produce and publish messages to the queue.
     """
@@ -85,10 +78,12 @@ def produce_message(amqp_url: str, condor_metrics: str) -> None:
         queue.declare()
 
         # Add destination to metrics
-        condor_metrics = f"{condor_metrics},destination_id=\"{vhost}\""
+        processed_metrics = []
+        for metr in metrics:
+            processed_metrics.append(f"{metr[0]},destination_id=\"{vhost}\",{metr[1]} {metr[2]}")
 
         producer.publish(
-            {"condor_metrics": condor_metrics},
+            {"metrics": processed_metrics},
             exchange=exchange,
             routing_key=routing_key,
             declare=[queue],
@@ -97,7 +92,7 @@ def produce_message(amqp_url: str, condor_metrics: str) -> None:
         connection.release()
 
 
-def main(pulsar_app_file: str, cluster_status_script_file: str) -> None:
+def main(pulsar_app_file: str, cluster_type: str) -> None:
 
     amqp_url = get_amqp_url(pulsar_app_file)
 
@@ -105,17 +100,21 @@ def main(pulsar_app_file: str, cluster_status_script_file: str) -> None:
         print("No Pulsar url found in the pulsar configuration file.")
         sys.exit(1)
 
-    # Get the condor status
-    condor_metrics = get_condor_status(cluster_status_script_file)
+    metrics = []
+    if cluster_type == "htcondor":
+        # Get the condor status
+        metrics = get_condor_cluster_utilisation()
+    else:
+        raise RuntimeError(f"Unsupported cluster type {cluster_type}")
 
     # Create and publish message
-    produce_message(amqp_url, condor_metrics)
+    produce_message(amqp_url, metrics)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Produce messages to AMQP queues.")
     parser.add_argument("pulsar_app_file", type=str, help="Path to the Pulsar app configuration file (YAML).")
-    parser.add_argument("cluster_status_script_file", type=str, help="Path to the shell script that produces influx compatible condor status metrics.")
+    parser.add_argument("cluster_type", type=str, default="htcondor", choices=["htcondor"], help="Type of HPC cluster to gather metrics from (only htcondor at the moment, Slurm could be implemented).")
     args = parser.parse_args()
 
-    main(args.pulsar_app_file, args.cluster_status_script_file)
+    main(args.pulsar_app_file, args.cluster_type)

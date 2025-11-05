@@ -11,6 +11,7 @@ pulsar_root: /opt/pulsar
 # multi pulsar setup
 pulsar_app_dir_list:
   - "{{ pulsar_root }}/config"
+cluster_type: htcondor  # Slurm could be supported at some point
 
 # role has to be one of consumer or producer
 pulsar_metric_role: consumer
