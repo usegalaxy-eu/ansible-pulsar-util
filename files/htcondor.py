@@ -25,11 +25,6 @@ def collect_metrics():
     for unclaimed_slot_type in unclaimed_slots_summary:
         classad = json.loads(unclaimed_slot_type)
 
-        print("Detected {} slots with {} CPUs and {} memory".format(
-            unclaimed_slots_summary[unclaimed_slot_type],
-            classad['Cpus'],
-            classad['Memory']
-        ))
 
         uniq_tag = f"{slot['Cpus']}c_{slot['Memory']}m"
 
