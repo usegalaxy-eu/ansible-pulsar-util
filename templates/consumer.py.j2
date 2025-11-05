@@ -11,6 +11,8 @@ import yaml
 from influxdb import InfluxDBClient
 from kombu import Connection, Consumer, Exchange, Queue
 
+from carbon_metrics import get_energy_metrics
+
 
 def get_pulsar_runners(job_conf_file: str, destinations: list) -> dict:
     """
@@ -262,32 +264,6 @@ def influxdb_create_newentry(client: InfluxDBClient, measurement: str, destinati
         return None
 
 
-def get_carbon_intensity(lat, lon) -> float:
-    request = f"""
-        https://api.electricitymaps.com/v3/carbon-intensity/
-        latest?lat={lat}&lon={lon}&temporalGranularity=hourly
-    """
-    response = requests.get(
-        request,
-        headers={ "auth-token": "{{ energy_auth_token }}" }
-    )
-    return response.json()["carbonIntensity"]
-
-
-def get_energy_metrics() -> dict:
-    """
-    Retrieve carbon intensity data for each pulsar node.
-    """
-    destinations = {{ destinations }}
-    intensities = {}
-
-    for node, (lat, lon) in destinations.items():
-        intensity = get_carbon_intensity(lat, lon)
-        intensities[node] = intensity
-
-    return intensities
-
-
 def main(job_conf_file: str, threshold: int, destinations: list) -> None:
     """
     Consume messages from multiple AMQP queues in parallel and aggregate the results.
@@ -326,9 +302,8 @@ def main(job_conf_file: str, threshold: int, destinations: list) -> None:
         for vhost, data in body.items():
             # Carbon intensity metric
             vhost_name = get_vhost_name(vhost)
-            carbon_intensity = energy_metrics[vhost_name]
-            if carbon_intensity is not None:
-                results.append(f"{{ consumer_energy_measurement }}, carbon_intensity={carbon_intensity}")
+            if energy_metrics[vhost_name] is not None:
+                results.append(energy_metrics[vhost_name])
             # Condor metrics
             if data:
                 data['condor_metrics'] = f"{data['condor_metrics']},destination_status=\"online\""

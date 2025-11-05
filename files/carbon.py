@@ -16,8 +16,61 @@ def parse_args():
     args = parser.parse_args()
     return args.latitude, args.longitude
 
-def main():
-    auth_token = ""
+
+def get_carbon_intensity(lat, lon) -> float:
+    request = f"""
+        https://api.electricitymaps.com/v3/carbon-intensity/
+        latest?lat={lat}&lon={lon}&temporalGranularity=hourly
+    """
+    response = requests.get(
+        request,
+        headers={ "auth-token": "{{ energy_auth_token }}" }
+    ).json()
+    return { "carbon_intensity": response["carbonIntensity"] }
+
+
+def get_price_day_ahead(lat, lon) -> dict:
+    request = f"""
+        https://api.electricitymaps.com/v3/price-day-ahead/
+        latest?lat={lat}&lon={lon}&temporalGranularity=hourly
+    """
+    response = requests.get(
+        request,
+        headers={ "auth-token": "{{ energy_auth_token }}" }
+    ).json()
+    return {"value": response["value"], "unit": response["unit"]}
+
+
+def get_electricity_mix(lat, lon) -> dict:
+    request = f"""
+        https://api.electricitymaps.com/v3/electricity-mix/
+        latest?lat={lat}&lon={lon}&temporalGranularity=hourly
+    """
+    response = requests.get(
+        request,
+        headers={ "auth-token": "{{ energy_auth_token }}" }
+    ).json()
+    mix = response["data"]["mix"]
+    mix["unit"] = response["unit"]
+    return mix
+
+
+def get_energy_metrics() -> dict:
+    """
+    Retrieve carbon intensity data for each pulsar node.
+    """
+    destinations = {{ destinations }}
+    influx_entries = {}
+
+    for node, (lat, lon) in destinations.items():
+        carbon_intensity = get_carbon_intensity(lat, lon)
+        price_day_ahead = get_price_day_ahead(lat, lon)
+        influx_entries[node] = f"{{ consumer_energy_measurement }}, carbon_intensity={carbon_intensity}, price_day_ahead={price_day_ahead}"
+
+    return influx_entries
+
+
+def get_energy_metrics() -> dict:
     lat, lon = parse_args()
     request_data = {
         "carbon-intensity" : ["carbonIntensity"],
@@ -33,11 +86,9 @@ def main():
         """
         response = requests.get(
             request,
-            headers={ "auth-token": auth_token }
-        )
+            headers={ "auth-token": "{{ energy_auth_token }}" }
+        ).json()
         for key in request_data[datum]:
-            stats[datum][key] = response.json()[key]
+            stats[datum][key] = response[key]
     
     return stats
-
-main()
