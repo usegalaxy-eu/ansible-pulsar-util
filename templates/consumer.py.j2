@@ -268,7 +268,7 @@ def get_carbon_intensity(auth_token, lat, lon) -> float:
     """
     response = requests.get(
         request,
-        headers={ "auth-token": auth_token }
+        headers={ "auth-token": "{{ em_auth_token }}" }
     )
     return response.json()["carbonIntensity"]
 
