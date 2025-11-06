@@ -56,11 +56,11 @@ def get_energy_metrics(energy_auth_token, destinations) -> dict:
         carbon_intensity = get_carbon_intensity(energy_auth_token, lat, lon)
         price_day_ahead = get_price_day_ahead(energy_auth_token, lat, lon)
         electricity_mix = get_electricity_mix(energy_auth_token, lat, lon)
-        influx_entries[node] = f"""
-            carbon_intensity={ carbon_intensity },
-            price_day_ahead={ price_day_ahead },
-            electricity_mix={ electricity_mix }
-        """
+        influx_entries[node] = (
+            f"carbon_intensity={ carbon_intensity },",
+            f"price_day_ahead={ price_day_ahead },",
+            f"electricity_mix={ electricity_mix }"
+        )
 
     return influx_entries
 
