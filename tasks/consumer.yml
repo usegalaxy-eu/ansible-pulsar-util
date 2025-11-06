@@ -17,7 +17,7 @@
 
 - name: Send machine group monitor
   ansible.builtin.copy:
-    src: "carbon.py.j2"
+    src: "carbon.py"
     dest: "{{ pulsar_consumer_dir }}/carbon_metrics.py"
     owner: root
     group: root
