@@ -349,8 +349,10 @@ def main(job_conf_file: str, tpv_dest_file: str, threshold: int, destinations: l
 
             # Condor metrics
             if data:
-                data['condor_metrics'] = f"{data['condor_metrics']},destination_status=\"online\""
-                results.append(data['condor_metrics'])
+                if data.get("condor_metrics"):
+                    data['condor_metrics'] = f"{data['condor_metrics']},destination_status=\"online\""
+                    results.append(data['condor_metrics'])
+
             else:
                 new_entry = influxdb_create_newentry(client, influxdb_measurement, vhost, threshold)
                 if new_entry:
