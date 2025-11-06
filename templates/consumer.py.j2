@@ -341,8 +341,12 @@ def main(job_conf_file: str, tpv_dest_file: str, threshold: int, destinations: l
         for vhost, data in body.items():
             # Carbon intensity metric
             vhost_name = get_vhost_name(vhost)
+
             if energy_metrics[vhost_name] is not None:
-                results.append(f"{{consumer_energy_measurement}},{energy_metrics[vhost_name]}")
+                for measurement, values in energy_metrics[vhost_name].items():
+                    energy_influx_str = measurement + " "  + ",".join(f"{k.replace(' ', '_')}={v}" for k, v in values.items()) + f",destination_id=\"{vhost_name}\""
+                    results.append(energy_influx_str)
+
             # Condor metrics
             if data:
                 data['condor_metrics'] = f"{data['condor_metrics']},destination_status=\"online\""
