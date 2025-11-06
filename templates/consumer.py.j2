@@ -343,7 +343,7 @@ def main(job_conf_file: str, tpv_dest_file: str, threshold: int, destinations: l
             vhost_name = get_vhost_name(vhost)
 
             if energy_metrics[vhost_name] is not None:
-                energy_influx_str = "pulsar_energy_metrics "  + ",".join(f"{k.replace(' ', '_')}={v}" for k, v in energy_metrics[vhost_name].items()) + f",destination_id=\"{vhost_name}\""
+                energy_influx_str = "{{ consumer_energy_measurement }} "  + ",".join(f"{k.replace(' ', '_')}={v}" for k, v in energy_metrics[vhost_name].items()) + f",destination_id=\"{vhost_name}\""
                 results.append(energy_influx_str)
 
             # Condor metrics
