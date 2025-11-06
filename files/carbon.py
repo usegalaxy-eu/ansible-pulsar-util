@@ -25,7 +25,7 @@ def get_price_day_ahead(auth_token, lat, lon) -> dict:
         headers={ "auth-token": auth_token }
     ).json()
     # todo: unit conversions if needed
-    return { "value": response["value"] }
+    return { "price_day_ahead": response["value"] }
 
 
 def get_electricity_mix(auth_token, lat, lon) -> dict:
@@ -56,11 +56,8 @@ def get_energy_metrics(energy_auth_token, destinations) -> dict:
         carbon_intensity = get_carbon_intensity(energy_auth_token, lat, lon)
         price_day_ahead = get_price_day_ahead(energy_auth_token, lat, lon)
         electricity_mix = get_electricity_mix(energy_auth_token, lat, lon)
-        energy_metrics[node] = {
-            "carbon_intensity" = carbon_intensity,
-            "price_day_ahead" = price_day_ahead,
-            "electricity_mix" = electricity_mix
-            }
+        energy_metrics[node] = {**carbon_intensity, **price_day_ahead, **electricity_mix}
+
 
     return energy_metrics
 
