@@ -47,7 +47,7 @@ def get_energy_metrics(energy_auth_token, destinations) -> dict:
     """
     Retrieve carbon intensity data for each pulsar node.
     """
-    influx_entries = {}
+    energy_metrics = {}
 
     for node, coords in destinations.items():
         lat = coords["latitude"]
@@ -60,7 +60,4 @@ def get_energy_metrics(energy_auth_token, destinations) -> dict:
 
 
     return energy_metrics
-
-
-    return influx_entries
 
