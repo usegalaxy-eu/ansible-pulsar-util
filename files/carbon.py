@@ -39,7 +39,7 @@ def get_electricity_mix(auth_token, lat, lon) -> dict:
         headers={ "auth-token": auth_token }
     ).json()
     # todo: unit conversions if needed
-    mix = response["data"]["mix"]
+    mix = response["data"][0]["mix"]
     return mix
 
 
