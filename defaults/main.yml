@@ -20,7 +20,10 @@ pulsar_metric_role: consumer
 pulsar_consumer_dir: "/opt/pulsar_metrics"
 consumer_venv_dir: "{{ pulsar_consumer_dir }}/venv"
 consumer_galaxy_job_conf: "{{ galaxy_config_dir }}/galaxy.yml"
+tpv_destinations_conf: "{{ tpv_mutable_dir }}/destinations.yml"
 
+consumer_energy_measurement: "pulsar_carbon_intensity"
+energy_auth_token: "secret_token"
 consumer_influx_address: ""
 consumer_influx_port: 8086
 consumer_influx_db: galaxy
