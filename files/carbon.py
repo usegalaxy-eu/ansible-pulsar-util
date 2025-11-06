@@ -58,26 +58,3 @@ def get_energy_metrics(energy_auth_token, destinations) -> dict:
 
     return influx_entries
 
-
-# def get_energy_metrics() -> dict:
-#     lat, lon = parse_args()
-#     request_data = {
-#         "carbon-intensity" : ["carbonIntensity"],
-#         "price-day-ahead" : ["value", "unit"]
-#     }
-#     stats = {}
-
-#     for datum in request_data:
-#         stats[datum] = {}
-#         request = f"""
-#             https://api.electricitymaps.com/v3/{datum}/
-#             latest?lat={lat}&lon={lon}&temporalGranularity=hourly
-#         """
-#         response = requests.get(
-#             request,
-#             headers={ "auth-token": "{{ energy_auth_token }}" }
-#         ).json()
-#         for key in request_data[datum]:
-#             stats[datum][key] = response[key]
-    
-#     return stats
