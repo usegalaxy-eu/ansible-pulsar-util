@@ -293,7 +293,8 @@ def main(job_conf_file: str, threshold: int, destinations: list) -> None:
     client = influxdb_connect(influxdb_host, influxdb_port, influxdb_username, influxdb_password, influxdb_database)
 
     # Fetch carbon intensities for each node
-    energy_metrics = get_energy_metrics()
+    energy_metrics = get_energy_metrics({{ energy_auth_token }}, {{ destinations }})
+    #! {{ destinations }} undefined
 
     # Aggregate the results from all processes
     results = []
@@ -303,7 +304,7 @@ def main(job_conf_file: str, threshold: int, destinations: list) -> None:
             # Carbon intensity metric
             vhost_name = get_vhost_name(vhost)
             if energy_metrics[vhost_name] is not None:
-                results.append(energy_metrics[vhost_name])
+                results.append(f"{{consumer_energy_measurement}},{energy_metrics[vhost_name]}")
             # Condor metrics
             if data:
                 data['condor_metrics'] = f"{data['condor_metrics']},destination_status=\"online\""
