@@ -47,6 +47,42 @@ def get_vhost_name(amqp_url: str) -> str:
     return vhost
 
 
+def get_destination_location(tpv_dest_file: str, destinations: list) -> dict:
+    """
+    Parse the tpv destinations.yml file and extract the geolocations for the destinations.
+    """
+    # Check the existence of the job_conf.yml file
+    if not os.path.exists(tpv_dest_file):
+        print(f"File {tpv_dest_file} does not exist.")
+        return None
+
+    with open(tpv_dest_file, "r") as file:
+        tpv_dest = yaml.safe_load(file)
+
+    destination_locations = {}
+    
+    for dest_name, dest_data in tpv_dest["destinations"].items():
+        runner = dest_data.get("runner")
+        if not runner:
+            continue
+            
+        if runner not in dest_list:
+            continue
+            
+        # extract latitude and longitude if available
+        context = dest_data.get("context", {})
+        lat = context.get("latitude")
+        lon = context.get("longitude")
+        
+        if lat is not None and lon is not None:
+            destination_locations[runner] = {
+                "latitude": lat,
+                "longitude": lon
+            }
+
+        return destination_locations
+    
+
 def connect_to_queue(amqp_url: str) -> Connection:
     """
     Connect to the AMQP queue using the provided URL.
@@ -264,7 +300,7 @@ def influxdb_create_newentry(client: InfluxDBClient, measurement: str, destinati
         return None
 
 
-def main(job_conf_file: str, threshold: int, destinations: list) -> None:
+def main(job_conf_file: str, tpv_dest_file: str, threshold: int, destinations: list) -> None:
     """
     Consume messages from multiple AMQP queues in parallel and aggregate the results.
     """
@@ -292,9 +328,11 @@ def main(job_conf_file: str, threshold: int, destinations: list) -> None:
     # Connect to the InfluxDB database
     client = influxdb_connect(influxdb_host, influxdb_port, influxdb_username, influxdb_password, influxdb_database)
 
+    # Get destination geo-locations
+    geo_locations = get_destination_location(tpv_dest_file, destinations)
+    
     # Fetch carbon intensities for each node
-    energy_metrics = get_energy_metrics({{ energy_auth_token }}, {{ destinations }})
-    #! {{ destinations }} undefined
+    energy_metrics = get_energy_metrics({{ energy_auth_token }}, geo_locations)
 
     # Aggregate the results from all processes
     results = []
@@ -321,8 +359,9 @@ def main(job_conf_file: str, threshold: int, destinations: list) -> None:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Consume messages from AMQP queues and aggregate them.")
     parser.add_argument("job_conf_file", type=str, help="Path to the job configuration file (YAML).")
+    parser.add_argument("tpv_dest_file", type=str, help="Path to the tpv destinations configuration file (YAML).")
     parser.add_argument("destinations", type=str, help="comma-separated list of destinations.")
     parser.add_argument("--threshold", type=int, default=600, help="Time threshold in seconds for setting destination_status=offline.")
     args = parser.parse_args()
 
-    main(args.job_conf_file, args.threshold, args.destinations.split(","))
+    main(args.job_conf_file, args.tpv_dest_file, args.threshold, args.destinations.split(","))
