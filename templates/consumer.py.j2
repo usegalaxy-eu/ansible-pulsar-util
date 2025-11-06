@@ -66,7 +66,7 @@ def get_destination_location(tpv_dest_file: str, destinations: list) -> dict:
         if not runner:
             continue
             
-        if runner not in dest_list:
+        if runner not in destinations:
             continue
             
         # extract latitude and longitude if available
@@ -332,7 +332,7 @@ def main(job_conf_file: str, tpv_dest_file: str, threshold: int, destinations: l
     geo_locations = get_destination_location(tpv_dest_file, destinations)
     
     # Fetch carbon intensities for each node
-    energy_metrics = get_energy_metrics({{ energy_auth_token }}, geo_locations)
+    energy_metrics = get_energy_metrics("{{ energy_auth_token }}", geo_locations)
 
     # Aggregate the results from all processes
     results = []
