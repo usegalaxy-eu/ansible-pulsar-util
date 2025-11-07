@@ -36,7 +36,7 @@
       mode: 0700
     with_items:
       - producer.py
-      - htcondor.py
+      - htcondor_cluster_util.py
 
   - name: Add cron to collect stats
     cron:
