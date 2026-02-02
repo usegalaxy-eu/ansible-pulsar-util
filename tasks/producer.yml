@@ -42,4 +42,4 @@
     cron:
       name: "condor stats"
       minute: "*"
-      job: "/opt/pulsar/venv3/bin/python {{ pulsar_metrics_scripts_path }}/producer.py {{ pulsar_app_dir }}/app.yml {{ cluster_type }}"
+      job: "/opt/pulsar/venv3/bin/python {{ pulsar_metrics_scripts_path }}/producer.py {{ pulsar_app_dir }}/app.yml {{ cluster_type }} >> /var/log/producer.log 2>&1"
